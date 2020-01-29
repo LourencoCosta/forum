@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import br.com.alura.forum.config.security.TokenService;
 import br.com.alura.forum.controllers.dto.TokenDto;
 import br.com.alura.forum.controllers.form.LoginForm;
+import br.com.alura.forum.repository.UsuarioRepository;
 
 @RestController
 @RequestMapping("/auth")
@@ -28,7 +29,6 @@ public class AutenticacaoController {
 	private TokenService tokenService;
 	
 	
-	
 	@PostMapping
 	public ResponseEntity<TokenDto> autenticar (@RequestBody @Valid LoginForm form){
 		UsernamePasswordAuthenticationToken dadosLogin = form.converter();
@@ -36,7 +36,7 @@ public class AutenticacaoController {
 		try {
 			Authentication authentication = authManager.authenticate(dadosLogin);
 			String token = tokenService.gerarToken(authentication);
-			return ResponseEntity.ok(new TokenDto(token, "Bearer"));
+			return ResponseEntity.ok(new TokenDto(token, "Bearer")); //Basic, Digest etc
 		}catch (AuthenticationException e){
 			return ResponseEntity.badRequest().build();
 		}

@@ -12,6 +12,9 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import br.com.alura.forum.repository.UsuarioRepository;
 
 @EnableWebSecurity
 @Configuration
@@ -20,6 +23,13 @@ public class SecurityConfigurations extends WebSecurityConfigurerAdapter{
 	
 	@Autowired
 	private AutenticacaoService autenticacaoService;
+	
+	@Autowired
+	private TokenService tokenService;
+	
+	@Autowired
+	private UsuarioRepository usuarioRepository;
+
 	
 	@Override
 	@Bean
@@ -41,9 +51,11 @@ public class SecurityConfigurations extends WebSecurityConfigurerAdapter{
 		antMatchers(HttpMethod.GET, "/topicos").permitAll().
 		antMatchers(HttpMethod.GET, "/topicos/*").permitAll().
 		antMatchers(HttpMethod.POST, "/auth").permitAll().
+		antMatchers(HttpMethod.GET, "/actuator/**").permitAll().
 		anyRequest().authenticated().
 		and().csrf().disable().//Valida tipo de ataque,quando se usa token se desbilita
-		sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);//informa que não deve ser criado uma sessao
+		sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS) //informa que não deve ser criado uma sessao
+		.and().addFilterBefore(new AutenticacaoViaTokenFilter(tokenService, usuarioRepository), UsernamePasswordAuthenticationFilter.class); // rodar o filtro antes do filtro default
 	}
 	
 	//Configura acesso a recursos estáticos
